@@ -17,8 +17,11 @@ fn main() {
         let frame = gtk::Frame::new(None);
         let area = DrawingArea::new();
         area.connect_draw(move|w, c|{
-            c.rectangle(1.0, 1.0, 100.0, 200.0);
-            c.fill();
+            c.set_source_rgb(0.0, 0.0, 0.0);
+            c.set_line_width(10.0);
+            c.move_to(0.0, 0.0);
+            c.line_to(200.0, 200.0);
+            c.stroke();
             gtk::Inhibit(false)
         });
         frame.add(&area);
