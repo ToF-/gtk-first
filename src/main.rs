@@ -41,7 +41,7 @@ fn main() {
 }
 
 fn build_ui(app: &Application) {
-    let (sender, receiver) = MainContext::channel::<Line>(PRIORITY_DEFAULT);
+    let (sender, receiver) = MainContext::channel::<Vec<Line>>(PRIORITY_DEFAULT);
 
     let area = DrawingArea::new();
     let a_line = Line {
@@ -55,7 +55,7 @@ fn build_ui(app: &Application) {
         },
     };
 
-    draw(a_line, &area);
+    draw(vec![a_line], &area);
 
     area.set_size_request(300, 300);
     let size = area.size_request();
@@ -88,17 +88,17 @@ fn build_ui(app: &Application) {
 
     receiver.attach(
         None,
-        move |line|{
+        move |line| {
             draw(line, &area);
             Continue(true)
-        }
+        },
     );
 
     // Present window
     window.present();
 }
 
-fn produce_line(sender: Sender<Line>, size: (i32, i32)) {
+fn produce_line(sender: Sender<Vec<Line>>, size: (i32, i32)) {
     let a_line = Line {
         start: Point {
             abscissa: 0f64,
@@ -110,14 +110,16 @@ fn produce_line(sender: Sender<Line>, size: (i32, i32)) {
         },
     };
     // Deactivate the button until the operation is done
-    sender.send(a_line).expect("Could not send through channel");
+    sender.send(vec![a_line]).expect("Could not send through channel");
 }
 
 
-fn draw(line: Line, area: &DrawingArea) {
+fn draw(lines: Vec<Line>, area: &DrawingArea) {
     area.unset_draw_func();
     area.set_draw_func(move |_w, c, _x, _y| {
         c.set_source_rgb(0.0, 0.0, 0.0);
-        c.draw_line(&line).expect("oops");
+        lines.iter().for_each(|line| {
+            c.draw_line(line).expect("oops");
+        });
     });
 }
