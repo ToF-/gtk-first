@@ -1,14 +1,18 @@
 let
-  # Last updated: 2/26/21. Update as necessary from https://status.nixos.org/...
   pkgs = import (fetchTarball("https://github.com/NixOS/nixpkgs/archive/22.05.tar.gz")) {};
-
-  # Rolling updates, not deterministic.
-  # pkgs = import (fetchTarball("channel:nixpkgs-unstable")) {};
+  rust-toolchain = pkgs.symlinkJoin {
+    name = "rust-toolchain";
+    paths = [
+    pkgs.rustc
+    pkgs.cargo
+    pkgs.rustfmt
+    pkgs.rust.packages.stable.rustPlatform.rustcSrc
+    pkgs.rust.packages.stable.rustPlatform.rustLibSrc
+    ];
+  };
 in pkgs.mkShell {
   buildInputs = [
-    pkgs.cargo
-    pkgs.rustc
-    pkgs.rustfmt
+    rust-toolchain
     pkgs.glib
     pkgs.pkg-config
     pkgs.gtk3
@@ -16,5 +20,5 @@ in pkgs.mkShell {
   ];
 
   # See https://discourse.nixos.org/t/rust-src-not-found-and-other-misadventures-of-developing-rust-on-nixos/11570/3?u=samuela.
-  RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+  RUST_SRC_PATH = "${rust-toolchain}";
 }
