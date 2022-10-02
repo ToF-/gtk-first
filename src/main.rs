@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, DrawingArea};
+use gtk::{Application, ApplicationWindow, Button, DrawingArea};
 use gtk::cairo::{Context, Error};
 
 struct Point {
@@ -33,11 +33,13 @@ fn main() {
         // We create the main window.
         let win = ApplicationWindow::builder()
             .application(app)
-            .default_width(320)
-            .default_height(200)
+            .default_width(400)
+            .default_height(400)
             .title("Hello, World!")
             .build();
+        let row = gtk::Box::new(gtk::Orientation::Vertical, 20);
         let frame = gtk::Frame::new(None);
+        frame.set_size_request(300, 300);
         let area = DrawingArea::new();
         area.connect_draw(move |_w, c| {
             c.set_source_rgb(0.0, 0.0, 0.0);
@@ -57,8 +59,15 @@ fn main() {
             c.draw_line(&a_line).unwrap();
             gtk::Inhibit(false)
         });
+
         frame.add(&area);
-        win.add(&frame);
+        row.add(&frame);
+        let button = Button::with_label("Click me!");
+        button.connect_clicked(move |_| {
+            println!("Hello");
+        });
+        row.add(&button);
+        win.add(&row);
         win.show_all();
     });
 
