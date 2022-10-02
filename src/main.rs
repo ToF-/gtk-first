@@ -94,7 +94,6 @@ fn build_ui(app: &Application) {
         },
     );
 
-    // Present window
     window.present();
 }
 
@@ -109,8 +108,17 @@ fn produce_line(sender: Sender<Vec<Line>>, size: (i32, i32)) {
             ordinate: size.1 as f64,
         },
     };
-    // Deactivate the button until the operation is done
-    sender.send(vec![a_line]).expect("Could not send through channel");
+    let a_line2 = Line {
+        start: Point {
+            abscissa: size.0 as f64,
+            ordinate: 0f64,
+        },
+        finish: Point {
+            abscissa: 0f64,
+            ordinate: size.1 as f64,
+        },
+    };
+    sender.send(vec![a_line, a_line2]).expect("Could not send through channel");
 }
 
 
