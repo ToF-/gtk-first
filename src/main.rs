@@ -3,7 +3,7 @@ use glib::Sender;
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, DrawingArea, Box};
 use gtk::cairo::{Context, Error};
-use gtk::glib::{clone, MainContext, PRIORITY_DEFAULT};
+use gtk::glib::{MainContext, PRIORITY_DEFAULT};
 use gtk::Orientation::Vertical;
 
 #[derive(Debug)]
@@ -71,16 +71,6 @@ fn build_ui(app: &Application) {
         });
     });
 
-    receiver.attach(
-        None,
-        clone!(@weak area => @default-return Continue(false),
-                    move |line| {
-                    draw(line, &area);
-                    Continue(true)
-                    }
-        ),
-    );
-
     let row = Box::builder()
         .orientation(Vertical)
         .spacing(30)
@@ -95,6 +85,14 @@ fn build_ui(app: &Application) {
         .title("Hello, World!")
         .child(&row)
         .build();
+
+    receiver.attach(
+        None,
+        move |line|{
+            draw(line, &area);
+            Continue(true)
+        }
+    );
 
     // Present window
     window.present();
