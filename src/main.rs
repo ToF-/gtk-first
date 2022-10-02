@@ -1,5 +1,22 @@
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, DrawingArea};
+use gtk::cairo::{Context, Error};
+
+struct Point {
+    abscissa: f64,
+    ordinate: f64,
+}
+
+struct Line {
+    start: Point,
+    finish: Point,
+}
+
+fn draw_line(line: &Line, context: &Context) -> Result<(), Error> {
+    context.move_to(line.start.abscissa, line.start.ordinate);
+    context.line_to(line.finish.abscissa, line.finish.ordinate);
+    context.stroke()
+}
 
 fn main() {
     let app = Application::builder()
@@ -16,12 +33,22 @@ fn main() {
             .build();
         let frame = gtk::Frame::new(None);
         let area = DrawingArea::new();
-        area.connect_draw(move|w, c|{
+        area.connect_draw(move |w, c| {
             c.set_source_rgb(0.0, 0.0, 0.0);
             c.set_line_width(10.0);
-            c.move_to(0.0, 0.0);
-            c.line_to(200.0, 200.0);
-            c.stroke();
+
+            let a_line = Line {
+                start: Point {
+                    abscissa: 0f64,
+                    ordinate: 0f64,
+                },
+                finish: Point {
+                    abscissa: 200f64,
+                    ordinate: 200f64,
+                },
+            };
+
+            draw_line(&a_line,c);
             gtk::Inhibit(false)
         });
         frame.add(&area);
