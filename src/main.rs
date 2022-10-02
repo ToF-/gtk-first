@@ -1,4 +1,5 @@
 use std::thread;
+use glib::Sender;
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, DrawingArea, Box};
 use gtk::cairo::{Context, Error};
@@ -57,6 +58,7 @@ fn build_ui(app: &Application) {
     draw(a_line, &area);
 
     area.set_size_request(300, 300);
+    let size = area.size_request();
 
     let button = Button::builder()
         .label("Click me!")
@@ -65,18 +67,7 @@ fn build_ui(app: &Application) {
     button.connect_clicked(move |_| {
         let sender = sender.clone();
         thread::spawn(move || {
-            let a_line = Line {
-                start: Point {
-                    abscissa: 0f64,
-                    ordinate: 0f64,
-                },
-                finish: Point {
-                    abscissa: 200f64,
-                    ordinate: 200f64,
-                },
-            };
-            // Deactivate the button until the operation is done
-            sender.send(a_line).expect("Could not send through channel");
+            produce_line(sender, size);
         });
     });
 
@@ -92,6 +83,7 @@ fn build_ui(app: &Application) {
 
     let row = Box::builder()
         .orientation(Vertical)
+        .spacing(30)
         .build();
     row.append(&area);
     row.append(&button);
@@ -108,14 +100,26 @@ fn build_ui(app: &Application) {
     window.present();
 }
 
+fn produce_line(sender: Sender<Line>, size: (i32, i32)) {
+    let a_line = Line {
+        start: Point {
+            abscissa: 0f64,
+            ordinate: 0f64,
+        },
+        finish: Point {
+            abscissa: size.0 as f64,
+            ordinate: size.1 as f64,
+        },
+    };
+    // Deactivate the button until the operation is done
+    sender.send(a_line).expect("Could not send through channel");
+}
+
+
 fn draw(line: Line, area: &DrawingArea) {
-    println!("drawing {:?}", line);
     area.unset_draw_func();
     area.set_draw_func(move |_w, c, _x, _y| {
         c.set_source_rgb(0.0, 0.0, 0.0);
-        c.set_line_width(10.0);
-
         c.draw_line(&line).expect("oops");
     });
-    println!("drawn");
 }
