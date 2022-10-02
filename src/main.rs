@@ -12,10 +12,16 @@ struct Line {
     finish: Point,
 }
 
-fn draw_line(line: &Line, context: &Context) -> Result<(), Error> {
-    context.move_to(line.start.abscissa, line.start.ordinate);
-    context.line_to(line.finish.abscissa, line.finish.ordinate);
-    context.stroke()
+trait LineDrawer {
+    fn draw_line(&self, line: &Line) -> Result<(), Error>;
+}
+
+impl LineDrawer for Context {
+    fn draw_line(&self, line: &Line) -> Result<(), Error> {
+        self.move_to(line.start.abscissa, line.start.ordinate);
+        self.line_to(line.finish.abscissa, line.finish.ordinate);
+        self.stroke()
+    }
 }
 
 fn main() {
@@ -33,7 +39,7 @@ fn main() {
             .build();
         let frame = gtk::Frame::new(None);
         let area = DrawingArea::new();
-        area.connect_draw(move |w, c| {
+        area.connect_draw(move |_w, c| {
             c.set_source_rgb(0.0, 0.0, 0.0);
             c.set_line_width(10.0);
 
@@ -48,7 +54,7 @@ fn main() {
                 },
             };
 
-            draw_line(&a_line,c);
+            c.draw_line(&a_line).unwrap();
             gtk::Inhibit(false)
         });
         frame.add(&area);
