@@ -1,22 +1,13 @@
+pub mod lines;
+
 use std::thread;
 use glib::Sender;
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Button, DrawingArea, Box};
+use gtk::{Application, ApplicationWindow, Box, Button, DrawingArea};
 use gtk::cairo::{Context, Error};
 use gtk::glib::{MainContext, PRIORITY_DEFAULT};
 use gtk::Orientation::Vertical;
-
-#[derive(Debug)]
-struct Point {
-    abscissa: f64,
-    ordinate: f64,
-}
-
-#[derive(Debug)]
-struct Line {
-    start: Point,
-    finish: Point,
-}
+use crate::lines::{create_lines, Line, Size};
 
 trait LineDrawer {
     fn draw_line(&self, line: &Line) -> Result<(), Error>;
@@ -44,21 +35,11 @@ fn build_ui(app: &Application) {
     let (sender, receiver) = MainContext::channel::<Vec<Line>>(PRIORITY_DEFAULT);
 
     let area = DrawingArea::new();
-    let a_line = Line {
-        start: Point {
-            abscissa: 0f64,
-            ordinate: 0f64,
-        },
-        finish: Point {
-            abscissa: 100f64,
-            ordinate: 100f64,
-        },
+    let size = Size {
+        height: 300f64,
+        width: 300f64,
     };
-
-    draw(vec![a_line], &area);
-
-    area.set_size_request(300, 300);
-    let size = area.size_request();
+    area.set_size_request(size.width as i32, size.height as i32);
 
     let button = Button::builder()
         .label("Click me!")
@@ -97,28 +78,8 @@ fn build_ui(app: &Application) {
     window.present();
 }
 
-fn produce_line(sender: Sender<Vec<Line>>, size: (i32, i32)) {
-    let a_line = Line {
-        start: Point {
-            abscissa: 0f64,
-            ordinate: 0f64,
-        },
-        finish: Point {
-            abscissa: size.0 as f64,
-            ordinate: size.1 as f64,
-        },
-    };
-    let a_line2 = Line {
-        start: Point {
-            abscissa: size.0 as f64,
-            ordinate: 0f64,
-        },
-        finish: Point {
-            abscissa: 0f64,
-            ordinate: size.1 as f64,
-        },
-    };
-    sender.send(vec![a_line, a_line2]).expect("Could not send through channel");
+fn produce_line(sender: Sender<Vec<Line>>, size: Size) {
+    sender.send(create_lines(size)).expect("Could not send through channel");
 }
 
 
