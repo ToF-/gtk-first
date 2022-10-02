@@ -15,7 +15,7 @@ in pkgs.mkShell {
     rust-toolchain
     pkgs.glib
     pkgs.pkg-config
-    pkgs.gtk3
+    pkgs.gtk4
     pkgs.jetbrains.idea-ultimate
   ];
 
