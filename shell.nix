@@ -12,6 +12,7 @@ in pkgs.mkShell {
     pkgs.glib
     pkgs.pkg-config
     pkgs.gtk3
+    pkgs.jetbrains.idea-ultimate
   ];
 
   # See https://discourse.nixos.org/t/rust-src-not-found-and-other-misadventures-of-developing-rust-on-nixos/11570/3?u=samuela.
