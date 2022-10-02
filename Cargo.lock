@@ -318,6 +318,7 @@ dependencies = [
 name = "gtk-first"
 version = "0.1.0"
 dependencies = [
+ "glib",
  "gtk4",
 ]
 

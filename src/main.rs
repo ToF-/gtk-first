@@ -1,13 +1,17 @@
+use std::thread;
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button, DrawingArea, Box};
 use gtk::cairo::{Context, Error};
+use gtk::glib::{clone, MainContext, PRIORITY_DEFAULT};
 use gtk::Orientation::Vertical;
 
+#[derive(Debug)]
 struct Point {
     abscissa: f64,
     ordinate: f64,
 }
 
+#[derive(Debug)]
 struct Line {
     start: Point,
     finish: Point,
@@ -36,25 +40,21 @@ fn main() {
 }
 
 fn build_ui(app: &Application) {
+    let (sender, receiver) = MainContext::channel::<Line>(PRIORITY_DEFAULT);
+
     let area = DrawingArea::new();
-    area.set_draw_func(move |_w, c, _x, _y| {
-        c.set_source_rgb(0.0, 0.0, 0.0);
-        c.set_line_width(10.0);
+    let a_line = Line {
+        start: Point {
+            abscissa: 0f64,
+            ordinate: 0f64,
+        },
+        finish: Point {
+            abscissa: 100f64,
+            ordinate: 100f64,
+        },
+    };
 
-        let a_line = Line {
-            start: Point {
-                abscissa: 0f64,
-                ordinate: 0f64,
-            },
-            finish: Point {
-                abscissa: 200f64,
-                ordinate: 200f64,
-            },
-        };
-
-        c.draw_line(&a_line).unwrap();
-    });
-
+    draw(a_line, &area);
 
     area.set_size_request(300, 300);
 
@@ -63,8 +63,32 @@ fn build_ui(app: &Application) {
         .build();
 
     button.connect_clicked(move |_| {
-        println!("Hello");
+        let sender = sender.clone();
+        thread::spawn(move || {
+            let a_line = Line {
+                start: Point {
+                    abscissa: 0f64,
+                    ordinate: 0f64,
+                },
+                finish: Point {
+                    abscissa: 200f64,
+                    ordinate: 200f64,
+                },
+            };
+            // Deactivate the button until the operation is done
+            sender.send(a_line).expect("Could not send through channel");
+        });
     });
+
+    receiver.attach(
+        None,
+        clone!(@weak area => @default-return Continue(false),
+                    move |line| {
+                    draw(line, &area);
+                    Continue(true)
+                    }
+        ),
+    );
 
     let row = Box::builder()
         .orientation(Vertical)
@@ -82,4 +106,16 @@ fn build_ui(app: &Application) {
 
     // Present window
     window.present();
+}
+
+fn draw(line: Line, area: &DrawingArea) {
+    println!("drawing {:?}", line);
+    area.unset_draw_func();
+    area.set_draw_func(move |_w, c, _x, _y| {
+        c.set_source_rgb(0.0, 0.0, 0.0);
+        c.set_line_width(10.0);
+
+        c.draw_line(&line).expect("oops");
+    });
+    println!("drawn");
 }
