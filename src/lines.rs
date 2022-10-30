@@ -41,15 +41,23 @@ pub fn create_lines(points: NumberOfPoints, factor: JunctionFactor) -> Vec<Line>
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::assert_lines_eq;
+    use crate::assert_points_eq;
+    use crate::assert_eq_delta;
 
     mod assertions {
         use super::*;
+
+        #[macro_export]
         macro_rules! assert_eq_delta {
             ($x:expr, $y:expr, $delta:expr) => {
-                if(f64::abs($x - $y) > $delta) {panic!();}
+                if(f64::abs($x - $y) > $delta) {panic!("Expected {} and {} difference to be less than {}",$x,$y,$delta);}
             };
         }
 
+        pub(crate) use assert_eq_delta;
+
+        #[macro_export]
         macro_rules! assert_points_eq {
             ($x:expr, $y:expr) => {
                 assert_eq_delta!($x.abscissa, $y.abscissa,0.0001);
@@ -57,12 +65,17 @@ mod tests {
             };
         }
 
+        pub(crate) use assert_points_eq;
+
+        #[macro_export]
         macro_rules! assert_lines_eq {
             ($x:expr, $y:expr) => {
                 assert_points_eq!($x.start, $y.start);
                 assert_points_eq!($x.finish, $y.finish);
             };
         }
+
+        pub(crate) use assert_lines_eq;
 
         #[test]
         fn allows_for_delta_in_comparison() {
@@ -168,7 +181,7 @@ mod tests {
     fn creates_2_lines_for_2_points() {
         let lines = create_lines(NumberOfPoints(2), JunctionFactor(1f64));
         assert_eq!(lines.len(), 2);
-        assert_eq!(lines[0], Line {
+        assert_lines_eq!(lines[0], Line {
             start: Point {
                 abscissa: 0f64,
                 ordinate: 1f64,
@@ -178,7 +191,7 @@ mod tests {
                 ordinate: -1f64,
             },
         });
-        assert_eq!(lines[1], Line {
+        assert_lines_eq!(lines[1], Line {
             start: Point {
                 abscissa: 0f64,
                 ordinate: -1f64,
