@@ -10,13 +10,13 @@ use gtk::Orientation::Vertical;
 use crate::lines::{create_lines, Line, Size};
 
 trait LineDrawer {
-    fn draw_line(&self, line: &Line) -> Result<(), Error>;
+    fn draw_line(&self, line: &Line, size: &Size) -> Result<(), Error>;
 }
 
 impl LineDrawer for Context {
-    fn draw_line(&self, line: &Line) -> Result<(), Error> {
-        self.move_to(line.start.abscissa, line.start.ordinate);
-        self.line_to(line.finish.abscissa, line.finish.ordinate);
+    fn draw_line(&self, line: &Line, size: &Size) -> Result<(), Error> {
+        self.move_to(line.start.abscissa * size.width, line.start.ordinate * size.height);
+        self.line_to(line.finish.abscissa * size.width, line.finish.ordinate * size.height);
         self.stroke()
     }
 }
@@ -48,7 +48,7 @@ fn build_ui(app: &Application) {
     button.connect_clicked(move |_| {
         let sender = sender.clone();
         thread::spawn(move || {
-            produce_line(sender, size);
+            produce_line(sender);
         });
     });
 
@@ -70,7 +70,7 @@ fn build_ui(app: &Application) {
     receiver.attach(
         None,
         move |line| {
-            draw(line, &area);
+            draw(line, &area, &size);
             Continue(true)
         },
     );
@@ -78,17 +78,18 @@ fn build_ui(app: &Application) {
     window.present();
 }
 
-fn produce_line(sender: Sender<Vec<Line>>, size: Size) {
-    sender.send(create_lines(size)).expect("Could not send through channel");
+fn produce_line(sender: Sender<Vec<Line>>) {
+    sender.send(create_lines()).expect("Could not send through channel");
 }
 
 
-fn draw(lines: Vec<Line>, area: &DrawingArea) {
+fn draw(lines: Vec<Line>, area: &DrawingArea, size: &Size) {
     area.unset_draw_func();
+    let copy_size = size.clone();
     area.set_draw_func(move |_w, c, _x, _y| {
         c.set_source_rgb(0.0, 0.0, 0.0);
         lines.iter().for_each(|line| {
-            c.draw_line(line).expect("oops");
+            c.draw_line(line, &copy_size).expect("oops");
         });
     });
 }

@@ -16,26 +16,36 @@ pub struct Size {
     pub height: f64,
 }
 
-pub fn create_lines(size: Size) -> Vec<Line> {
+pub fn create_lines() -> Vec<Line> {
     let a_line = Line {
         start: Point {
             abscissa: 0f64,
             ordinate: 0f64,
         },
         finish: Point {
-            abscissa: size.width,
-            ordinate: size.height,
+            abscissa: 1f64,
+            ordinate: 1f64,
         },
     };
     let a_line2 = Line {
         start: Point {
-            abscissa: size.width,
+            abscissa: 1f64,
             ordinate: 0f64,
         },
         finish: Point {
             abscissa: 0f64,
-            ordinate: size.height,
+            ordinate: 1f64,
         },
     };
     vec![a_line, a_line2]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn displays_2_lines_for_2_points() {
+        // create_lines()
+    }
 }
