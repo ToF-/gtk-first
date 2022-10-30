@@ -19,10 +19,14 @@ trait LineDrawer {
     fn draw_line(&self, line: &Line, size: Size) -> Result<(), Error>;
 }
 
+fn scale(n: f64, factor: f64) -> f64 {
+    n * factor + factor
+}
+
 impl LineDrawer for Context {
     fn draw_line(&self, line: &Line, size: Size) -> Result<(), Error> {
-        self.move_to(line.start.abscissa * size.width, line.start.ordinate * size.height);
-        self.line_to(line.finish.abscissa * size.width, line.finish.ordinate * size.height);
+        self.move_to(scale(line.start.abscissa, size.width), scale(line.start.ordinate, size.height));
+        self.line_to(scale(line.finish.abscissa, size.width), scale(line.finish.ordinate, size.height));
         self.stroke()
     }
 }
@@ -42,10 +46,10 @@ fn build_ui(app: &Application) {
 
     let area = DrawingArea::new();
     let size = Size {
-        height: 300f64,
-        width: 300f64,
+        height: 150f64,
+        width: 150f64,
     };
-    area.set_size_request(size.width as i32, size.height as i32);
+    area.set_size_request(size.width as i32 * 2, size.height as i32 * 2);
 
     let button = Button::builder()
         .label("Click me!")
