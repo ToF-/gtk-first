@@ -1,10 +1,10 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Point {
     pub abscissa: f64,
     pub ordinate: f64,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Line {
     pub start: Point,
     pub finish: Point,
@@ -54,6 +54,13 @@ mod tests {
             ($x:expr, $y:expr) => {
                 assert_eq_delta!($x.abscissa, $y.abscissa,0.0001);
                 assert_eq_delta!($x.ordinate, $y.ordinate,0.0001);
+            };
+        }
+
+        macro_rules! assert_lines_eq {
+            ($x:expr, $y:expr) => {
+                assert_points_eq!($x.start, $y.start);
+                assert_points_eq!($x.finish, $y.finish);
             };
         }
 
@@ -119,6 +126,41 @@ mod tests {
                 ordinate: 1f64 + 0.001f64,
             };
             assert_points_eq!(b,a);
+        }
+
+        #[test]
+        fn two_lines_are_equals_when_points_are_equals() {
+            let a = Point {
+                abscissa: 0f64,
+                ordinate: 1f64,
+            };
+            let b = Point {
+                abscissa: 0f64 + 0.00001f64,
+                ordinate: 1f64 + 0.00001f64,
+            };
+            let line1 = Line { start: a, finish: b };
+            let line2 = Line { start: a, finish: b };
+            assert_lines_eq!(line1,line2);
+        }
+
+        #[test]
+        #[should_panic]
+        fn two_lines_are_not_equals_when_points_are_different() {
+            let a = Point {
+                abscissa: 0f64,
+                ordinate: 1f64,
+            };
+            let b = Point {
+                abscissa: 0f64 + 0.00001f64,
+                ordinate: 1f64 + 0.00001f64,
+            };
+            let c = Point {
+                abscissa: 0f64 + 0.01f64,
+                ordinate: 1f64 + 0.00001f64,
+            };
+            let line1 = Line { start: a, finish: b };
+            let line2 = Line { start: a, finish: c };
+            assert_lines_eq!(line1,line2);
         }
     }
 
