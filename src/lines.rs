@@ -10,12 +10,6 @@ pub struct Line {
     pub finish: Point,
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct Size {
-    pub width: f64,
-    pub height: f64,
-}
-
 pub fn create_lines() -> Vec<Line> {
     let a_line = Line {
         start: Point {
