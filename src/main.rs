@@ -7,7 +7,7 @@ use gtk::{Application, ApplicationWindow, Box, Button, DrawingArea};
 use gtk::cairo::{Context, Error};
 use gtk::glib::{MainContext, PRIORITY_DEFAULT};
 use gtk::Orientation::Vertical;
-use crate::lines::{create_lines, Line};
+use crate::lines::{create_lines, JunctionFactor, Line, NumberOfPoints};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Size {
@@ -85,7 +85,7 @@ fn build_ui(app: &Application) {
 }
 
 fn produce_line(sender: Sender<Vec<Line>>) {
-    sender.send(create_lines()).expect("Could not send through channel");
+    sender.send(create_lines(NumberOfPoints(72), JunctionFactor(2f64))).expect("Could not send through channel");
 }
 
 
